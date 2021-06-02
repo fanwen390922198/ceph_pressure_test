@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD><meta name="viewport" content="width=device-width, initial-scale=1">
+<Title>Log Scale Axis</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+
+<p class="heading0">ChartDirector 6.0 (Python Edition)</p>
+<p class="heading1">Log Scale Axis</p>
+<hr class="separator">
+<div class="content">
+<img src="images/logaxis0.png">&nbsp;&nbsp;<img src="images/logaxis1.png">
+<br><br>
+This example demonstrates using a log scale axis versus a linear scale axis.<br><br>
+In ChartDirector, log scale axis can be configured using <a href="Axis.setLogScale.htm">Axis.setLogScale</a>, <a href="Axis.setLogScale2.htm">Axis.setLogScale2</a> or <a href="Axis.setLogScale3.htm">Axis.setLogScale3</a>.
+</div>
+<p class="heading1a">Source Code Listing</p>
+<div class="content">
+<b>[Standalone Version]</b> pythondemo\logaxis.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+
+def createChart(chartIndex) :
+
+    # The data for the chart
+    data = [100, 125, 260, 147, 67]
+    labels = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+
+    # Create a XYChart object of size 200 x 180 pixels
+    c = XYChart(200, 180)
+
+    # Set the plot area at (30, 10) and of size 140 x 130 pixels
+    c.setPlotArea(30, 10, 140, 130)
+
+    # Ise log scale axis if required
+    if chartIndex == 1 :
+        c.yAxis().setLogScale3()
+
+    # Set the labels on the x axis
+    c.xAxis().setLabels(labels)
+
+    # Add a color bar layer using the given data. Use a 1 pixel 3D border for the bars.
+    c.addBarLayer3(data).setBorderColor(-1, 1)
+
+    # Output the chart
+    c.makeChart("logaxis%s.png" % chartIndex)
+
+
+createChart(0)
+createChart(1)</pre></td></tr></table><br><b>[CGI Version]</b> pythondemo_cgi\logaxis.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+import cgi, sys
+
+# Get HTTP query parameters
+query = cgi.FieldStorage()
+
+# This script can draw different charts depending on the chartIndex
+chartIndex = int(query["img"].value)
+
+# The data for the chart
+data = [100, 125, 260, 147, 67]
+labels = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+
+# Create a XYChart object of size 200 x 180 pixels
+c = XYChart(200, 180)
+
+# Set the plot area at (30, 10) and of size 140 x 130 pixels
+c.setPlotArea(30, 10, 140, 130)
+
+# Ise log scale axis if required
+if chartIndex == 1 :
+    c.yAxis().setLogScale3()
+
+# Set the labels on the x axis
+c.xAxis().setLabels(labels)
+
+# Add a color bar layer using the given data. Use a 1 pixel 3D border for the bars.
+c.addBarLayer3(data).setBorderColor(-1, 1)
+
+# Output the chart
+print("Content-type: image/png\n")
+binaryPrint(c.makeChart2(PNG))</pre></td></tr></table>
+</div>
+<br><hr class="separator"><div class="copyright">&copy; 2017 Advanced Software Engineering Limited. All rights reserved.</div>
+</body>
+</HTML>

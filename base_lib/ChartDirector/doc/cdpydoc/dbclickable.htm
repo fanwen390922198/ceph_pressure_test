@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD><meta name="viewport" content="width=device-width, initial-scale=1">
+<Title>Database Clickable Charts</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+<p class="heading0">ChartDirector 6.0 (Python Edition)</p>
+<p class="heading1">Database Clickable Charts</p>
+<hr class="separator">
+<div class="content"><img src="images/dbclickable_doc.png"><br><br>
+In this section, we will present an example that employs both database and image maps.<br><br>
+This example displays a bar chart that shows the revenue for the last 10 years. When the user clicks on a bar, it will "drill down" to another bar chart showing the monthly revenue for the year represented by the bar clicked. All data come from a database.<br><br>
+The code that creates the clickable bar chart for the last 10 years are as follows.<br><br>
+<b>[CGI Version]</b> pythondemo_cgi\dbdemo3.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+
+#
+# Query the database to get the for the 12 years from 1994 to 2005. In this demo,
+# we will just dynamically generate some numbers instead of a real database.
+#
+revenue = []
+timestamp = []
+
+seed = 700
+for i in range(1994, 2006) :
+    revenue.append(seed)
+    timestamp.append(str(i))
+    seed = seed * 1.2
+
+#
+# Now we have read data into arrays, we can draw the chart using ChartDirector
+#
+
+# Create a XYChart object of size 600 x 360 pixels
+c = XYChart(600, 360)
+
+# Set the plotarea at (60, 40) and of size 480 x 280 pixels. Use a vertical gradient color from
+# light blue (eeeeff) to deep blue (0000cc) as background. Set border and grid lines to white
+# (ffffff).
+c.setPlotArea(60, 40, 480, 280, c.linearGradientColor(60, 40, 60, 280, 0xeeeeff, 0x0000cc), -1,
+    0xffffff, 0xffffff)
+
+# Add a title to the chart using 18pt Times Bold Italic font
+c.addTitle("Annual Revenue for Star Tech", "timesbi.ttf", 18)
+
+# Add a multi-color bar chart layer using the supplied data
+layer = c.addBarLayer3(revenue)
+
+# Use glass lighting effect with light direction from the left
+layer.setBorderColor(Transparent, glassEffect(NormalGlare, Left))
+
+# Set the x axis labels
+c.xAxis().setLabels(timestamp)
+
+# Set y-axis tick density to 30 pixels. ChartDirector auto-scaling will use this as the guideline
+# when putting ticks on the y-axis.
+c.yAxis().setTickDensity(30)
+
+# Synchronize the left and right y-axes
+c.syncYAxis()
+
+# Set the y axes titles with 10pt Arial Bold font
+c.yAxis().setTitle("USD (Millions)", "arialbd.ttf", 10)
+c.yAxis2().setTitle("USD (Millions)", "arialbd.ttf", 10)
+
+# Set all axes to transparent
+c.xAxis().setColors(Transparent)
+c.yAxis().setColors(Transparent)
+c.yAxis2().setColors(Transparent)
+
+# Set the label styles of all axes to 8pt Arial Bold font
+c.xAxis().setLabelStyle("arialbd.ttf", 8)
+c.yAxis().setLabelStyle("arialbd.ttf", 8)
+c.yAxis2().setLabelStyle("arialbd.ttf", 8)
+
+# Create the image
+chart1URL = c.makeTmpFile("/tmp/tmpcharts")
+
+# Create an image map for the chart
+imageMap = c.getHTMLImageMap("dbdemo3a.py", "", "title='{xLabel}: US$ {value|0}M'")
+
+print("Content-type: text/html\n")
+print("""
+&lt;html&gt;
+&lt;body style="margin:5px 0px 0px 5px"&gt;
+&lt;div style="font-size:18pt; font-family:verdana; font-weight:bold"&gt;
+    Database Clickable Charts
+&lt;/div&gt;
+&lt;hr style="border:solid 1px #000080" /&gt;
+&lt;div style="font-size:10pt; font-family:verdana; width:600px; margin-bottom:20px"&gt;
+    The example demonstrates creating a clickable chart using data from a database.
+    Click on a bar below to "drill down" onto a particular year.
+&lt;br /&gt;&lt;br /&gt;
+&lt;a href='viewsource.py?file=%(SCRIPT_NAME)s'&gt;
+    View source code
+&lt;/a&gt;
+&lt;/div&gt;
+
+&lt;img src="getchart.py?img=/tmp/tmpcharts/%(chart1URL)s" border="0" usemap="#map1"&gt;
+&lt;map name="map1"&gt;
+%(imageMap)s
+&lt;/map&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+""" % {
+    "SCRIPT_NAME" : os.environ["SCRIPT_NAME"],
+    "chart1URL" : chart1URL,
+    "imageMap" : imageMap
+    })</pre></td></tr></table><br>
+The above code first performs a database query and read the data into arrays. It then uses the data to create a bar chart. The chart is saved in a temporary file using <a href="BaseChart.makeTmpFile.htm">BaseChart.makeTmpFile</a>. An &lt;IMG&gt; tag is used to retrieve the chart with "getchart.py?img=/tmp/tmpcharts/%(chart1URL)s" as the URL. "getchart.py" is a simple utility that comes with ChartDirector for retrieving images from files. The image map for the chart is created using <a href="BaseChart.getHTMLImageMap.htm">BaseChart.getHTMLImageMap</a> with "dbdemo3a.py" as the handler.<br><br>
+<div style="background-color:#cccccc;width:99%;padding:10px;box-sizing:border-box;">
+<b><font color="#FF0000">NOTE:</font></b> This sample script uses "getchart.py" and assumes it is in the same directory as the script. When developing your own script using this sample script as a template, please ensure you copy "getchart.py" to the same directory as your script. If you put "getchart.py" in other directory, please adjust the paths in your script accordingly.
+</div><br>
+When the user clicks on the bar chart, "dbdemo3a.py" will be invoked with a number of HTTP query parameters to indicate which bar the user has clicked. In particular, the xLabel parameter will contain the x-axis label for the bar clicked. With this parameter, "dbdemo3a.py" can determine which year the user has clicked. It can then query the database for the data in that year, and produces the bar chart for that year.<br><br>
+In this example, "dbdemo3a.py" will produce another clickable chart using "xystub.py" as the handler.<br><br>
+<b>[CGI Version]</b> pythondemo_cgi\dbdemo3a.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+import cgi, sys
+
+# Get HTTP query parameters
+query = cgi.FieldStorage()
+
+#
+# Displays the monthly revenue for the selected year. The selected year should be passed in as a
+# query parameter called "xLabel"
+#
+try :
+    selectedYear = int(query["xLabel"].value)
+except :
+    selectedYear = 2005
+
+#
+# Query the database to get monthly reveunes for software, hardware and services for
+# the year. In this demo, we will use random numbers instead of a real database.
+#
+rantable = RanTable(selectedYear, 3, 12)
+rantable.setCol(0, 30 * (selectedYear - 1990),  80 * (selectedYear - 1990))
+rantable.setCol(1, 30 * (selectedYear - 1990),  80 * (selectedYear - 1990))
+rantable.setCol(2, 30 * (selectedYear - 1990),  80 * (selectedYear - 1990))
+
+software = rantable.getCol(0)
+hardware = rantable.getCol(1)
+services = rantable.getCol(2)
+
+#
+# Now we have read data into arrays, we can draw the chart using ChartDirector
+#
+
+# Create a XYChart object of size 600 x 360 pixels
+c = XYChart(600, 360)
+
+# Set the plotarea at (60, 50) and of size 480 x 270 pixels. Use a vertical gradient color from
+# light blue (eeeeff) to deep blue (0000cc) as background. Set border and grid lines to white
+# (ffffff).
+c.setPlotArea(60, 50, 480, 270, c.linearGradientColor(60, 50, 60, 270, 0xeeeeff, 0x0000cc), -1,
+    0xffffff, 0xffffff)
+
+# Add a title to the chart using 15pt Times Bold Italic font
+c.addTitle("Global Revenue for Year %s" % (selectedYear), "timesbi.ttf", 18)
+
+# Add a legend box at (60, 25) (top of the plotarea) with 9pt Arial Bold font
+c.addLegend(60, 25, 0, "arialbd.ttf", 9).setBackground(Transparent)
+
+# Add a line chart layer using the supplied data
+layer = c.addLineLayer2()
+layer.addDataSet(software, 0xffaa00, "Software").setDataSymbol(CircleShape, 9)
+layer.addDataSet(hardware, 0x00ff00, "Hardware").setDataSymbol(DiamondShape, 11)
+layer.addDataSet(services, 0xff0000, "Services").setDataSymbol(Cross2Shape(), 11)
+
+# Set the line width to 3 pixels
+layer.setLineWidth(3)
+
+# Set the x axis labels. In this example, the labels must be Jan - Dec.
+labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"]
+c.xAxis().setLabels(labels)
+
+# Set y-axis tick density to 30 pixels. ChartDirector auto-scaling will use this as the guideline
+# when putting ticks on the y-axis.
+c.yAxis().setTickDensity(30)
+
+# Synchronize the left and right y-axes
+c.syncYAxis()
+
+# Set the y axes titles with 10pt Arial Bold font
+c.yAxis().setTitle("USD (Millions)", "arialbd.ttf", 10)
+c.yAxis2().setTitle("USD (Millions)", "arialbd.ttf", 10)
+
+# Set all axes to transparent
+c.xAxis().setColors(Transparent)
+c.yAxis().setColors(Transparent)
+c.yAxis2().setColors(Transparent)
+
+# Set the label styles of all axes to 8pt Arial Bold font
+c.xAxis().setLabelStyle("arialbd.ttf", 8)
+c.yAxis().setLabelStyle("arialbd.ttf", 8)
+c.yAxis2().setLabelStyle("arialbd.ttf", 8)
+
+# Create the image and save it in a temporary location
+chart1URL = c.makeTmpFile("/tmp/tmpcharts")
+
+# Create an image map for the chart
+imageMap = c.getHTMLImageMap("xystub.py", "", "title='{dataSetName} @ {xLabel} = USD {value|0}M'")
+
+print("Content-type: text/html\n")
+print("""
+&lt;html&gt;
+&lt;body style="margin:5px 0px 0px 5px"&gt;
+&lt;div style="font-size:18pt; font-family:verdana; font-weight:bold"&gt;
+    Database Clickable Charts
+&lt;/div&gt;
+&lt;hr style="border:solid 1px #000080" /&gt;
+&lt;div style="font-size:10pt; font-family:verdana; width:600px; margin-bottom:20px"&gt;
+    You have click the bar for the year %(selectedYear)s.
+    Below is the "drill-down" chart showing the monthly details.
+&lt;br /&gt;&lt;br /&gt;
+&lt;a href='viewsource.py?file=%(SCRIPT_NAME)s'&gt;
+    View source code
+&lt;/a&gt;
+&lt;/div&gt;
+
+&lt;img src="getchart.py?img=/tmp/tmpcharts/%(chart1URL)s" border="0" usemap="#map1"&gt;
+&lt;map name="map1"&gt;
+%(imageMap)s
+&lt;/map&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+""" % {
+    "selectedYear" : selectedYear,
+    "SCRIPT_NAME" : os.environ["SCRIPT_NAME"],
+    "chart1URL" : chart1URL,
+    "imageMap" : imageMap
+    })</pre></td></tr></table><br>
+For demo purpose, "xystub.py" simply displays information on what is clicked. It's source code is as follows.<br><br>
+<b>[CGI Version]</b> pythondemo_cgi\xystub.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+import cgi, sys, os
+
+# Get HTTP query parameters
+query = cgi.FieldStorage(keep_blank_values = 1)
+
+print("Content-type: text/html\n")
+print("""
+&lt;html&gt;
+&lt;body style="margin:5px 0px 0px 5px"&gt;
+&lt;div style="font-size:18pt; font-family:verdana; font-weight:bold"&gt;
+    Simple Clickable XY Chart Handler
+&lt;/div&gt;
+&lt;hr style="border:solid 1px #000080" /&gt;
+&lt;div style="font-size:10pt; font-family:verdana; margin-bottom:20px"&gt;
+    &lt;a href="viewsource.py?file=%(SCRIPT_NAME)s"&gt;View Source Code&lt;/a&gt;
+&lt;/div&gt;
+&lt;div style="font-size:10pt; font-family:verdana;"&gt;
+&lt;b&gt;You have clicked on the following chart element :&lt;/b&gt;&lt;br /&gt;
+&lt;ul&gt;
+    &lt;li&gt;Data Set : %(dataSetName)s&lt;/li&gt;
+    &lt;li&gt;X Position : %(x)s&lt;/li&gt;
+    &lt;li&gt;X Label : %(xLabel)s&lt;/li&gt;
+    &lt;li&gt;Data Value : %(value)s&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+""" % {
+    "SCRIPT_NAME" : os.environ["SCRIPT_NAME"],
+    "dataSetName" : query["dataSetName"].value,
+    "x" : query["x"].value,
+    "xLabel" : query["xLabel"].value,
+    "value" : query["value"].value
+    })</pre></td></tr></table></div><br>
+<hr class="separator"><div class="copyright">&copy; 2017 Advanced Software Engineering Limited. All rights reserved.</div></body>
+</HTML>

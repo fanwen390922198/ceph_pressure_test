@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD><meta name="viewport" content="width=device-width, initial-scale=1">
+<Title>Simple Clickable Charts</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+<p class="heading0">ChartDirector 6.0 (Python Edition)</p>
+<p class="heading1">Simple Clickable Charts</p>
+<hr class="separator">
+<div class="content">In this example, we will create a bar chart that displays the annual revenue of a company for the last 10 years. When a bar is clicked, the browser will load a line chart showing the monthly revenue for the selected year. When the line chart is clicked, the browser will load a pie chart showing the breakdown of the revenue for the selected month. When the pie chart is clicked, it will show the sector details in a web page.<br><br>
+The capability is often called "drill-down", because the user can get more details about an item by clicking on its representation on the chart.
+</div><p class="heading1a">Clickable Bar Chart</p><div class="content">
+<img src="images/clickbar_doc.png"><br><br>
+<b>[CGI Version]</b> pythondemo_cgi\clickbar.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+
+# The data for the bar chart
+data = [450, 560, 630, 800, 1100, 1350, 1600, 1950, 2300, 2700]
+
+# The labels for the bar chart
+labels = ["1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005"]
+
+# Create a XYChart object of size 600 x 360 pixels
+c = XYChart(600, 360)
+
+# Add a title to the chart using 18pt Times Bold Italic font
+c.addTitle("Annual Revenue for Star Tech", "timesbi.ttf", 18)
+
+# Set the plotarea at (60, 40) and of size 500 x 280 pixels. Use a vertical gradient color from
+# light blue (eeeeff) to deep blue (0000cc) as background. Set border and grid lines to white
+# (ffffff).
+c.setPlotArea(60, 40, 500, 280, c.linearGradientColor(60, 40, 60, 280, 0xeeeeff, 0x0000cc), -1,
+    0xffffff, 0xffffff)
+
+# Add a multi-color bar chart layer using the supplied data. Use soft lighting effect with light
+# direction from top.
+c.addBarLayer3(data).setBorderColor(Transparent, softLighting(Top))
+
+# Set x axis labels using the given labels
+c.xAxis().setLabels(labels)
+
+# Draw the ticks between label positions (instead of at label positions)
+c.xAxis().setTickOffset(0.5)
+
+# When auto-scaling, use tick spacing of 40 pixels as a guideline
+c.yAxis().setTickDensity(40)
+
+# Add a title to the y axis with 12pt Times Bold Italic font
+c.yAxis().setTitle("USD (millions)", "timesbi.ttf", 12)
+
+# Set axis label style to 8pt Arial Bold
+c.xAxis().setLabelStyle("arialbd.ttf", 8)
+c.yAxis().setLabelStyle("arialbd.ttf", 8)
+
+# Set axis line width to 2 pixels
+c.xAxis().setWidth(2)
+c.yAxis().setWidth(2)
+
+# Create the image and save it in a temporary location
+chart1URL = c.makeTmpFile("/tmp/tmpcharts")
+
+# Create an image map for the chart
+imageMap = c.getHTMLImageMap("clickline.py", "", "title='{xLabel}: US$ {value|0}M'")
+
+print("Content-type: text/html\n")
+print("""
+&lt;html&gt;
+&lt;body style="margin:5px 0px 0px 5px"&gt;
+&lt;div style="font-size:18pt; font-family:verdana; font-weight:bold"&gt;
+    Simple Clickable Bar Chart
+&lt;/div&gt;
+&lt;hr style="border:solid 1px #000080" /&gt;
+&lt;div style="font-size:10pt; font-family:verdana; margin-bottom:20"&gt;
+    &lt;a href="viewsource.py?file=%(SCRIPT_NAME)s"&gt;View Source Code&lt;/a&gt;
+&lt;/div&gt;
+&lt;img src="getchart.py?img=/tmp/tmpcharts/%(chart1URL)s" border="0" usemap="#map1"&gt;
+&lt;map name="map1"&gt;
+%(imageMap)s
+&lt;/map&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+""" % {
+    "SCRIPT_NAME" : os.environ["SCRIPT_NAME"],
+    "chart1URL" : chart1URL,
+    "imageMap" : imageMap
+    })</pre></td></tr></table><br>
+In the above code, the chart is created and saved in a temporary file in the "/tmp/tmp_chart" directory using <a href="BaseChart.makeTmpFile.htm">BaseChart.makeTmpFile</a>. This function also simultaneously removes old temporary files (default lifetime = 600 seconds) to avoid temporary files from building up.<br><br>
+<b>Note:</b> For the above code to run correctly, please verify the web server anonymous user has sufficient privileges to read and write to "/tmp/tmp_chart".<br><br>
+An &lt;IMG&gt; tag is used to retrieve the chart with "getchart.py?img=/tmp/tmpcharts/%(chart1URL)s"  as the URL. "getchart.py" is a simple utility that comes with ChartDirector for retrieving images files. The "getchart.py" is needed because the "/tmp/tmp_chart" directory is not under the web server root directory. If your scripts use a temporary directory that is under the web server root directory, you may put the temporary file URL directly in the &lt;IMG&gt; tag instead of using "getchart.py".<br><br>
+<div style="background-color:#cccccc;width:99%;padding:10px;box-sizing:border-box;">
+<b><font color="#FF0000">NOTE:</font></b> This sample script uses "getchart.py" and assumes it is in the same directory as the script. When developing your own script using this sample script as a template, please ensure you copy "getchart.py" to the same directory as your script. If you put "getchart.py" in other directory, please adjust the paths in your script accordingly.
+</div><br>
+The image map for the chart is created using the following code:<br><br>
+<div style="background-color:#cccccc;width:99%;padding:5px;box-sizing:border-box;"><pre>imageMap = c.getHTMLImageMap("clickline.py", "",
+    "title='{xLabel}: US$ {value|0}M'")</pre></div><br>
+As seen above, only one line of code is needed. <a href="BaseChart.getHTMLImageMap.htm">BaseChart.getHTMLImageMap</a> will generate the image map for the entire chart. The image map will use "clickline.py" as the handler when a bar is clicked.<br><br>
+If you right click on the browser and choose "View Source" to look at the HTML of the web page as received by the browser, you can see that the image map generated above will be something like:<br><br>
+<div style="background-color:#cccccc;width:99%;padding:5px;box-sizing:border-box;"><pre>&lt;area shape="rect" coords="67,278,103,320" title='1996: US$ 450M'
+    href="clickline.py?x=0&xLabel=1996&dataSet=0&dataSetName=&value=450"&gt;
+
+&lt;area shape="rect" coords="117,268,153,320" title='1997: US$ 560M'
+    href="clickline.py?x=1&xLabel=1997&dataSet=1&dataSetName=&value=560"&gt;
+
+&lt;area shape="rect" coords="167,261,203,320" title='1998: US$ 630M'
+    href="clickline.py?x=2&xLabel=1998&dataSet=2&dataSetName=&value=630"&gt;
+
+&lt;area shape="rect" coords="217,245,253,320" title='1999: US$ 800M'
+    href="clickline.py?x=3&xLabel=1999&dataSet=3&dataSetName=&value=800"&gt;
+
+...... (one &lt;area&gt; tag for each bar) ......</pre></div><br>
+The image map generated by ChartDirector contains one &lt;AREA&gt; tag per bar. This defines the bars as hot spots. The "href" attribute of the &lt;AREA&gt; tag includes the handler URL as well as query parameters about the bar. This allows the handler to distinguish which bar the user has clicked.<br><br>
+The &lt;AREA&gt; tags also include "title" attributes, which act as pop up tooltips. In this example, the tooltips are in the format:<br><br>
+<div style="margin-left:25px;font-family:courier new,courier"> "title='{xLabel}: US$ {value|0}M'" </div><br>
+which is specified as the third argument of <a href="BaseChart.getHTMLImageMap.htm">BaseChart.getHTMLImageMap</a>.
+</div><p class="heading1a">Clickable Line Chart</p><div class="content">
+<img src="images/clickline_doc.png"><br><br>
+In the previous Clickable Bar Chart sample code, when a bar is clicked, "clickline.py" will be invoked.<br><br>
+The code for the handler is listed below. It determines which year the user has clicked from query parameters. It then creates a clickable line chart for that year using "clickpie.py" as the click handler. As the code is similar to the Clickable Bar Chart, it will not be explained further.<br><br>
+<b>[CGI Version]</b> pythondemo_cgi\clickline.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+import cgi, sys
+
+# Get HTTP query parameters
+query = cgi.FieldStorage()
+
+# Get the selected year.
+selectedYear = query["xLabel"].value
+
+#
+# In real life, the data may come from a database based on selectedYear. In this example, we just
+# use a random number generator.
+#
+seed = 50 + (int(selectedYear) - 1996) * 15
+rantable = RanTable(seed, 1, 12)
+rantable.setCol2(0, seed,  - seed * 0.25, seed * 0.33, seed * 0.1, seed * 3)
+
+data = rantable.getCol(0)
+
+#
+# Now we obtain the data into arrays, we can start to draw the chart using ChartDirector
+#
+
+# Create a XYChart object of size 600 x 320 pixels
+c = XYChart(600, 360)
+
+# Add a title to the chart using 18pt Times Bold Italic font
+c.addTitle("Month Revenue for Star Tech for %s" % (selectedYear), "timesbi.ttf", 18)
+
+# Set the plotarea at (60, 40) and of size 500 x 280 pixels. Use a vertical gradient color from
+# light blue (eeeeff) to deep blue (0000cc) as background. Set border and grid lines to white
+# (ffffff).
+c.setPlotArea(60, 40, 500, 280, c.linearGradientColor(60, 40, 60, 280, 0xeeeeff, 0x0000cc), -1,
+    0xffffff, 0xffffff)
+
+# Add a red line (ff0000) chart layer using the data
+dataSet = c.addLineLayer().addDataSet(data, 0xff0000, "Revenue")
+
+# Set the line width to 3 pixels
+dataSet.setLineWidth(3)
+
+# Use a 13 point circle symbol to plot the data points
+dataSet.setDataSymbol(CircleSymbol, 13)
+
+# Set the labels on the x axis. In this example, the labels must be Jan - Dec.
+labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"]
+c.xAxis().setLabels(labels)
+
+# When auto-scaling, use tick spacing of 40 pixels as a guideline
+c.yAxis().setTickDensity(40)
+
+# Add a title to the x axis to reflect the selected year
+c.xAxis().setTitle("Year %s" % (selectedYear), "timesbi.ttf", 12)
+
+# Add a title to the y axis
+c.yAxis().setTitle("USD (millions)", "timesbi.ttf", 12)
+
+# Set axis label style to 8pt Arial Bold
+c.xAxis().setLabelStyle("arialbd.ttf", 8)
+c.yAxis().setLabelStyle("arialbd.ttf", 8)
+
+# Set axis line width to 2 pixels
+c.xAxis().setWidth(2)
+c.yAxis().setWidth(2)
+
+# Create the image and save it in a temporary location
+chart1URL = c.makeTmpFile("/tmp/tmpcharts")
+
+# Create an image map for the chart
+imageMap = c.getHTMLImageMap("clickpie.py?year=%s" % (selectedYear), "",
+    "title='{xLabel}: US$ {value|0}M'")
+
+print("Content-type: text/html\n")
+print("""
+&lt;html&gt;
+&lt;body style="margin:5px 0px 0px 5px"&gt;
+&lt;div style="font-size:18pt; font-family:verdana; font-weight:bold"&gt;
+    Simple Clickable Line Chart
+&lt;/div&gt;
+&lt;hr style="border:solid 1px #000080" /&gt;
+&lt;div style="font-size:10pt; font-family:verdana; margin-bottom:20"&gt;
+    &lt;a href="viewsource.py?file=%(SCRIPT_NAME)s"&gt;View Source Code&lt;/a&gt;
+&lt;/div&gt;
+&lt;img src="getchart.py?img=/tmp/tmpcharts/%(chart1URL)s" border="0" usemap="#map1"&gt;
+&lt;map name="map1"&gt;
+%(imageMap)s
+&lt;/map&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+""" % {
+    "SCRIPT_NAME" : os.environ["SCRIPT_NAME"],
+    "chart1URL" : chart1URL,
+    "imageMap" : imageMap
+    })</pre></td></tr></table></div><p class="heading1a">Clickable Pie Chart</p><div class="content">
+<img src="images/clickpie_doc.png"><br><br>
+In the previous Clickable Line Chart sample code, when a line is clicked, "clickpie.py" will be invoked.<br><br>
+The code for the handler is listed below. It determines which year and month the user has clicked from query parameters. It then creates a clickable pie chart for that year and month, using "piestub.py" as the click handler. As the code is very similar to the Clickable Bar Chart, it will not be explained further.<br><br>
+<b>[CGI Version]</b> pythondemo_cgi\clickpie.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+import cgi, sys
+
+# Get HTTP query parameters
+query = cgi.FieldStorage()
+
+# Get the selected year and month
+selectedYear = int(query["year"].value)
+selectedMonth = int(query["x"].value) + 1
+
+#
+# In real life, the data may come from a database based on selectedYear. In this example, we just
+# use a random number generator.
+#
+seed = (selectedYear - 1992) * (100 + 3 * selectedMonth)
+rantable = RanTable(seed, 1, 4)
+rantable.setCol(0, seed * 0.003, seed * 0.017)
+
+data = rantable.getCol(0)
+
+# The labels for the pie chart
+labels = ["Services", "Hardware", "Software", "Others"]
+
+# Create a PieChart object of size 600 x 240 pixels
+c = PieChart(600, 280)
+
+# Set the center of the pie at (300, 140) and the radius to 120 pixels
+c.setPieSize(300, 140, 120)
+
+# Add a title to the pie chart using 18pt Times Bold Italic font
+c.addTitle("Revenue Breakdown for %s/%s" % (selectedMonth, selectedYear), "timesbi.ttf", 18)
+
+# Draw the pie in 3D with 20 pixels 3D depth
+c.set3D(20)
+
+# Set label format to display sector label, value and percentage in two lines
+c.setLabelFormat("{label}&lt;*br*&gt;${value|2}M ({percent}%)")
+
+# Set label style to 10pt Arial Bold Italic font. Set background color to the same as the sector
+# color, with reduced-glare glass effect and rounded corners.
+t = c.setLabelStyle("arialbi.ttf", 10)
+t.setBackground(SameAsMainColor, Transparent, glassEffect(ReducedGlare))
+t.setRoundedCorners()
+
+# Use side label layout method
+c.setLabelLayout(SideLayout)
+
+# Set the pie data and the pie labels
+c.setData(data, labels)
+
+# Create the image and save it in a temporary location
+chart1URL = c.makeTmpFile("/tmp/tmpcharts")
+
+# Create an image map for the chart
+imageMap = c.getHTMLImageMap("piestub.py", "", "title='{label}:US$ {value|2}M'")
+
+print("Content-type: text/html\n")
+print("""
+&lt;html&gt;
+&lt;body style="margin:5px 0px 0px 5px"&gt;
+&lt;div style="font-size:18pt; font-family:verdana; font-weight:bold"&gt;
+    Simple Clickable Pie Chart
+&lt;/div&gt;
+&lt;hr style="border:solid 1px #000080" /&gt;
+&lt;div style="font-size:10pt; font-family:verdana; margin-bottom:20"&gt;
+    &lt;a href="viewsource.py?file=%(SCRIPT_NAME)s"&gt;View Source Code&lt;/a&gt;
+&lt;/div&gt;
+&lt;img src="getchart.py?img=/tmp/tmpcharts/%(chart1URL)s" border="0" usemap="#map1"&gt;
+&lt;map name="map1"&gt;
+%(imageMap)s
+&lt;/map&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+""" % {
+    "SCRIPT_NAME" : os.environ["SCRIPT_NAME"],
+    "chart1URL" : chart1URL,
+    "imageMap" : imageMap
+    })</pre></td></tr></table></div><p class="heading1a">Clickable Pie Chart Handler</p><div class="content">
+<img src="images/piestub_doc.png"><br><br>
+In the previous Clickable Pie Chart sample code, when a sector is clicked, "piestub.py" will be invoked. Its code is listed below. In this example, it simply displays some data about the sector.<br><br>
+<b>[CGI Version]</b> pythondemo_cgi\piestub.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+import cgi, sys, os
+
+# Get HTTP query parameters
+query = cgi.FieldStorage(keep_blank_values = 1)
+
+print("Content-type: text/html\n")
+print("""
+&lt;html&gt;
+&lt;body style="margin:5px 0px 0px 5px"&gt;
+&lt;div style="font-size:18pt; font-family:verdana; font-weight:bold"&gt;
+    Simple Clickable Pie Chart Handler
+&lt;/div&gt;
+&lt;hr style="border:solid 1px #000080" /&gt;
+&lt;div style="font-size:10pt; font-family:verdana; margin-bottom:20px"&gt;
+    &lt;a href="viewsource.py?file=%(SCRIPT_NAME)s"&gt;View Source Code&lt;/a&gt;
+&lt;/div&gt;
+&lt;div style="font-size:10pt; font-family:verdana;"&gt;
+&lt;b&gt;You have clicked on the following sector :&lt;/b&gt;&lt;br /&gt;
+&lt;ul&gt;
+    &lt;li&gt;Sector Number : %(sector)s&lt;/li&gt;
+    &lt;li&gt;Sector Name : %(label)s&lt;/li&gt;
+    &lt;li&gt;Sector Value : %(value)s&lt;/li&gt;
+    &lt;li&gt;Sector Percentage : %(percent)s%%&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+""" % {
+    "SCRIPT_NAME" : os.environ["SCRIPT_NAME"],
+    "sector" : query["sector"].value,
+    "label" : query["label"].value,
+    "value" : query["value"].value,
+    "percent" : query["percent"].value
+    })</pre></td></tr></table></div><br>
+<hr class="separator"><div class="copyright">&copy; 2017 Advanced Software Engineering Limited. All rights reserved.</div></body>
+</HTML>

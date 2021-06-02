@@ -1,0 +1,60 @@
+{
+  "Server": {
+    "ListenIP": "127.0.0.1",
+    "ListenPORT": 7706,
+    "RbdPool": "rbd",
+    "EveryRbdTestVolumeSize": 10240,
+    "OneNodeRbdClients": 1,
+    "PutEveryClientFioResultFileTo": "./client/",
+    "AnalysisFioResult": true
+  },
+  "Client": {
+    "PressureTestServer": "127.0.0.1",
+    "PressureTestPort": 7706,
+    "FioEngine": "libaio",
+    "IsCephPressTest": 0,
+    "CephIO": "ceph -w",
+    "PutCephIoResultFileTo": "./ceph/",
+    "AnalysisCephResult": true,
+    "ClientList": [
+      "sm1",
+      "sm2",
+      "sm3",
+      "sm4",
+      "sm5",
+      "sm6",
+      "sm7",
+      "sm8"
+    ],
+    "ClientPressTestTarget": [
+      "vdb",
+      "vdb",
+      "vdb",
+      "vdc",
+      "vdb",
+      "vdb",
+      "vdb",
+      "vdb"
+    ],
+    "FioPlan": [
+      {
+        "rw_type": "randrw",
+        "run_time": 600,
+        "block_size": "4k",
+        "total_size": "30G",
+        "numjobs": 16,
+        "iodepth": 16,
+        "client_nums": 8
+      },
+      {
+        "rw_type": "readwrite",
+        "run_time": 600,
+        "block_size": "512k",
+        "total_size": "100G",
+        "numjobs": 16,
+        "iodepth": 16,
+        "client_nums": 8
+      }
+    ]
+  }
+}

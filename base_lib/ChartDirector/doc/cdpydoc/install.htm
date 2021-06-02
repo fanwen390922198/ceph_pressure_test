@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD><meta name="viewport" content="width=device-width, initial-scale=1">
+<Title>Installation</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+<p class="heading0">ChartDirector 6.0 (Python Edition)</p>
+<p class="heading1">Installation</p>
+<hr class="separator">
+<p class="heading1aa">Python Version Compatibility</p><div class="content">
+ChartDirector for Python requires at least Python 1.5, and has been tested up to Python 3.7 (the latest Python release as of the date of this document).
+</div><p class="heading1a">Installing ChartDirector for Python</p><div class="content">
+ChartDirector for Python is released as a zip file on Windows, and as a tar.gz file on Linux, FreeBSD, Mac OS X and Solaris. To install ChartDirector for Python:<br><br>
+<ul>
+<li>Extract the files from distribution.<br><br>
+<ul>
+<li>On Windows, you may use the Windows Explorer's built-in compressed folder support, 7-Zip or similar tools to extract the zip file.<br><br>
+<li>On Linux, FreeBSD, Mac OS X and Solaris, you may use:<br><br>
+<div style="margin-left:25px;font-family:courier new,courier">
+<pre>gunzip [chartdir_file_name].tar.gz
+tar xvf [chartdir_file_name].tar</pre> </div></ul>
+<li>The files for the ChartDirector for Python module are in "ChartDirector/lib". Copy *everything* in "ChartDirector/lib" (including the fonts subdirectory in Linux, FreeBSD and Solaris versions) to a directory in your Python module search path.<br><br>
+<div style="background-color:#cccccc;width:99%;padding:10px;box-sizing:border-box;">
+If you do not know what is the Python module search path in your system, you may enter the following command to find out.<br><br>
+<div style="margin-left:25px;font-family:courier new,courier"> python -c "import sys;print(sys.path)" </div></div></ul>
+If you do not have write access to any of the directories in the default Python module search path, the followings are some alternative methods to use ChartDirector.<br><br>
+<ul>
+<li>Copy *everything* in "ChartDirector/lib" to the same directory as the script.<br><br>
+<li>Set the PYTHONPATH environment variable to add an extra directory to the Python module search path.<br><br>
+<li>Directly manipulate the "sys.path" variable in your Python script to change the Python module search path for your script.<br></ul>
+</div><p class="heading1a">Running ChartDirector Sample Programs</p><div class="content">
+ChartDirector for Python comes with numerous sample Python scripts under the "ChartDirector/pythondemo" and "ChartDirector/pythondemo_cgi" directories. The former is for standalone scripts, while the latter is for CGI scripts. They are good examples and tutorials on how to use ChartDirector.<br><br>
+You may run these sample scripts to verify that ChartDirector is correctly installed.<br><br>
+To run the standalone ChartDirector sample scripts:<br><br>
+<ul>
+<li>In the command line prompt, change to the "ChartDirector/pythondemo" directory.<br><br>
+<li>Type "python [script_name]". For example, the command "python simplebar.py" should generate a PNG chart image called "simplebar.png".<br></ul>
+To run the ChartDirector sample CGI scripts:<br><br>
+<ul>
+<li>Copy all files in "ChartDirector/pythondemo_cgi" to your web server's CGI directory.<br><br>
+<div style="background-color:#cccccc;width:99%;padding:10px;box-sizing:border-box;">
+<b>Note:</b> If you have not installed the ChartDirector for Python module in a directory in your Python module search path, you would need to copy *everything* in "ChartDirector/lib" to the same CGI script directory as the ChartDirector sample scripts.
+</div><br>
+<li>Browse the sample scripts by using a browser to access the sample scripts index page "index.py".<br><br>
+<div style="background-color:#cccccc;width:99%;padding:10px;box-sizing:border-box;">
+<b>Note for Linux, FreeBSD, Mac OS X and Solaris:</b> All ChartDirector sample scripts assume the Python interpreter is at "<nobr><code>#!/usr/bin/python</code></nobr>" for Linux and Mac OS X, and "<nobr><code>#!/usr/local/bin/python</code></nobr>" for FreeBSD and Solaris. If your Python interpreter is not at the expected location, you may create a symbolic link at the expected location to point to the actual location of your Python interpreter. (Of course, you may also change all scripts to use the actual location of your Python interpreter, but it is much easier to just make a link.)
+</div><br>
+If for some reason, you cannot see the charts, please click on the "check installation" link on main index page. This will perform a diagnostic test and display any error encountered.<br></ul>
+</div><p class="heading1a">Using ChartDirector for Python in Your Own Scripts</p><div class="content">
+Any Python program that uses ChartDirector should include the following statement:<br><br>
+<div style="margin-left:25px;font-family:courier new,courier"> from pychartdir import *<br><br>
+or<br><br>
+import pychartdir </div><br>
+Depending on how you installed ChartDirector, you may need to copy the ChartDirector for Python module files (*everything* in "ChartDirector/lib") to your script directory.
+</div><p class="heading1a">Installing the ChartDirector License</p><div class="content">
+If you have purchased a license to use ChartDirector, you should have a license key delivered to your via email and postal mail.<br><br>
+If your license key is for upgrading from a previous version of ChartDirector, you need to append the upgrade license key to the previous version license key, and use the combined license key.<br><br>
+There are two alternative methods to install the license key.<br><br>
+<ul>
+<li>Create a one-line ASCII file using Notepad or other text editor, and put the license key in that line. The whole file should contain only the license key. Name that file "chartdir.lic" and put the file in the same directory as the active "libchartdir.so"  (for Linux, FreeBSD, Mac OS X and Solaris) or "chartdir.dll" (for Windows),  which should be in   the directory where the ChartDirector for  Python module is installed or copied to.<br><br>
+If the license file appears to have no effect (does not disable the yellow banner line), and you are running on a web server environment, please make sure the web server "anonymous user" has read access to the "chartdir.lic" file. You may copy the file "ChartDirector/pythondemo_cgi/cdinfo.py" to your web server and access it using a browser. It will display a diagnostic page explaining why the license cannot be loaded.<br><br>
+<div style="background-color:#cccccc;width:99%;padding:10px;box-sizing:border-box;">
+Make sure your license file is called "chartdir.lic". In particular, Notepad may automatically append ".txt" to the file name when creating a new file. So even if the file is saved as "chartdir.lic", it may end up as "chartdir.lic.txt". If this is the case, please rename the file back to "chartdir.lic".
+</div><br>
+<li>An alternative method is to hard code the license key into the source code by using the <a href="pychartdir.setLicenseCode.htm">pychartdir.setLicenseCode</a> API. This method is recommended if your are redistributing ChartDirector, because your customer will then be unable to see the license key (unless your software is open source).<br><br>
+<div style="margin-left:25px;font-family:courier new,courier"> setLicenseCode(".....your-license-key.....") </div></ul></div><br>
+<hr class="separator"><div class="copyright">&copy; 2017 Advanced Software Engineering Limited. All rights reserved.</div></body>
+</HTML>

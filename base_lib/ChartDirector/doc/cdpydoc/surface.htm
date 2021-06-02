@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD><meta name="viewport" content="width=device-width, initial-scale=1">
+<Title>Surface Chart (1)</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+
+<p class="heading0">ChartDirector 6.0 (Python Edition)</p>
+<p class="heading1">Surface Chart (1)</p>
+<hr class="separator">
+<div class="content">
+<img src="images/surface.jpg">
+<br><br>
+This example demonstrates the basic steps in creating surface charts.<br><br>
+<ul><li> Create a <a href="SurfaceChart.htm">SurfaceChart</a> object using <a href="SurfaceChart.SurfaceChart.htm">SurfaceChart.SurfaceChart</a>.<br><br>
+<li> Specify the position and size of the plot region using <a href="ThreeDChart.setPlotRegion.htm">ThreeDChart.setPlotRegion</a>.<br><br>
+<li> Set data to the chart using <a href="SurfaceChart.setData.htm">SurfaceChart.setData</a>.<br><br>
+<li> Interpolate the data using <a href="SurfaceChart.setInterpolation.htm">SurfaceChart.setInterpolation</a> for extra smoothness of the surface.<br><br>
+<li> Set the position of the color axis (the color legend) using <a href="ThreeDChart.setColorAxis.htm">ThreeDChart.setColorAxis</a>.<br><br>
+<li> Add chart and axis titles using <a href="BaseChart.addTitle.htm">BaseChart.addTitle</a> and <a href="Axis.setTitle.htm">Axis.setTitle</a>.<br><br>
+<li> Generate the chart using <a href="BaseChart.makeChart.htm">BaseChart.makeChart</a>.</ul>
+</div>
+<p class="heading1a">Source Code Listing</p>
+<div class="content">
+<b>[Standalone Version]</b> pythondemo\surface.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+import math
+
+# The x and y coordinates of the grid
+dataX = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+dataY = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# The values at the grid points. In this example, we will compute the values using the formula z = x
+# * sin(y) + y * sin(x).
+dataZ = [0] * (len(dataX) * len(dataY))
+for yIndex in range(0, len(dataY)) :
+    y = dataY[yIndex]
+    for xIndex in range(0, len(dataX)) :
+        x = dataX[xIndex]
+        dataZ[yIndex * len(dataX) + xIndex] = x * math.sin(y) + y * math.sin(x)
+
+# Create a SurfaceChart object of size 720 x 600 pixels
+c = SurfaceChart(720, 600)
+
+# Add a title to the chart using 20 points Times New Roman Italic font
+c.addTitle("Surface Energy Density   ", "timesi.ttf", 20)
+
+# Set the center of the plot region at (350, 280), and set width x depth x height to 360 x 360 x 270
+# pixels
+c.setPlotRegion(350, 280, 360, 360, 270)
+
+# Set the data to use to plot the chart
+c.setData(dataX, dataY, dataZ)
+
+# Spline interpolate data to a 80 x 80 grid for a smooth surface
+c.setInterpolation(80, 80)
+
+# Add a color axis (the legend) in which the left center is anchored at (645, 270). Set the length
+# to 200 pixels and the labels on the right side.
+c.setColorAxis(645, 270, Left, 200, Right)
+
+# Set the x, y and z axis titles using 10 points Arial Bold font
+c.xAxis().setTitle("X (nm)", "arialbd.ttf", 10)
+c.yAxis().setTitle("Y (nm)", "arialbd.ttf", 10)
+c.zAxis().setTitle("Energy Density (J/m&lt;*font,super*&gt;2&lt;*/font*&gt;)", "arialbd.ttf", 10)
+
+# Output the chart
+c.makeChart("surface.jpg")</pre></td></tr></table><br><b>[CGI Version]</b> pythondemo_cgi\surface.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+import math
+
+# The x and y coordinates of the grid
+dataX = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+dataY = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# The values at the grid points. In this example, we will compute the values using the formula z = x
+# * sin(y) + y * sin(x).
+dataZ = [0] * (len(dataX) * len(dataY))
+for yIndex in range(0, len(dataY)) :
+    y = dataY[yIndex]
+    for xIndex in range(0, len(dataX)) :
+        x = dataX[xIndex]
+        dataZ[yIndex * len(dataX) + xIndex] = x * math.sin(y) + y * math.sin(x)
+
+# Create a SurfaceChart object of size 720 x 600 pixels
+c = SurfaceChart(720, 600)
+
+# Add a title to the chart using 20 points Times New Roman Italic font
+c.addTitle("Surface Energy Density   ", "timesi.ttf", 20)
+
+# Set the center of the plot region at (350, 280), and set width x depth x height to 360 x 360 x 270
+# pixels
+c.setPlotRegion(350, 280, 360, 360, 270)
+
+# Set the data to use to plot the chart
+c.setData(dataX, dataY, dataZ)
+
+# Spline interpolate data to a 80 x 80 grid for a smooth surface
+c.setInterpolation(80, 80)
+
+# Add a color axis (the legend) in which the left center is anchored at (645, 270). Set the length
+# to 200 pixels and the labels on the right side.
+c.setColorAxis(645, 270, Left, 200, Right)
+
+# Set the x, y and z axis titles using 10 points Arial Bold font
+c.xAxis().setTitle("X (nm)", "arialbd.ttf", 10)
+c.yAxis().setTitle("Y (nm)", "arialbd.ttf", 10)
+c.zAxis().setTitle("Energy Density (J/m&lt;*font,super*&gt;2&lt;*/font*&gt;)", "arialbd.ttf", 10)
+
+# Output the chart
+print("Content-type: image/jpeg\n")
+binaryPrint(c.makeChart2(JPG))</pre></td></tr></table>
+</div>
+<br><hr class="separator"><div class="copyright">&copy; 2017 Advanced Software Engineering Limited. All rights reserved.</div>
+</body>
+</HTML>

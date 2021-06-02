@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD><meta name="viewport" content="width=device-width, initial-scale=1">
+<Title>Bar Labels</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+
+<p class="heading0">ChartDirector 6.0 (Python Edition)</p>
+<p class="heading1">Bar Labels</p>
+<hr class="separator">
+<div class="content">
+<img src="images/barlabel.png">
+<br><br>
+This example extends the <a href="simplebar.htm">Simple Bar Chart (1)</a> example by including bar labels on the bars, and decorating the bars with rounded corners and gradient shading.<br><br>
+<ul><li> Use <a href="Layer.setAggregateLabelStyle.htm">Layer.setAggregateLabelStyle</a> to include labels on top of the bars. There is an alternative method <a href="Layer.setDataLabelStyle.htm">Layer.setDataLabelStyle</a> for including the labels inside the bars.<br><br>
+<li> Use <a href="BarLayer.setRoundedCorners.htm">BarLayer.setRoundedCorners</a> to configure the bars to have rounded corners.<br><br>
+<li> Use <a href="Layer.setBorderColor.htm">Layer.setBorderColor</a> with <a href="pychartdir.barLighting.htm">pychartdir.barLighting</a> to apply a gradient shading effect to the bars.</ul>
+</div>
+<p class="heading1a">Source Code Listing</p>
+<div class="content">
+<b>[Standalone Version]</b> pythondemo\barlabel.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+
+# The data for the bar chart
+data = [85, 156, 179, 211, 123, 189, 166]
+
+# The labels for the bar chart
+labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+# Create a XYChart object of size 600 x 360 pixels
+c = XYChart(600, 360)
+
+# Set the plotarea at (70, 20) and of size 500 x 300 pixels, with transparent background and border
+# and light grey (0xcccccc) horizontal grid lines
+c.setPlotArea(70, 20, 500, 300, Transparent, -1, Transparent, 0xcccccc)
+
+# Set the x and y axis stems to transparent and the label font to 12pt Arial
+c.xAxis().setColors(Transparent)
+c.yAxis().setColors(Transparent)
+c.xAxis().setLabelStyle("arial.ttf", 12)
+c.yAxis().setLabelStyle("arial.ttf", 12)
+
+# Add a blue (0x6699bb) bar chart layer using the given data
+layer = c.addBarLayer(data, 0x6699bb)
+
+# Use bar gradient lighting with the light intensity from 0.8 to 1.3
+layer.setBorderColor(Transparent, barLighting(0.8, 1.3))
+
+# Set rounded corners for bars
+layer.setRoundedCorners()
+
+# Display labela on top of bars using 12pt Arial font
+layer.setAggregateLabelStyle("Arial", 12)
+
+# Set the labels on the x axis.
+c.xAxis().setLabels(labels)
+
+# For the automatic y-axis labels, set the minimum spacing to 40 pixels.
+c.yAxis().setTickDensity(40)
+
+# Add a title to the y axis using dark grey (0x555555) 14pt Arial Bold font
+c.yAxis().setTitle("Y-Axis Title Placeholder", "arialbd.ttf", 14, 0x555555)
+
+# Output the chart
+c.makeChart("barlabel.png")</pre></td></tr></table><br><b>[CGI Version]</b> pythondemo_cgi\barlabel.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+
+# The data for the bar chart
+data = [85, 156, 179, 211, 123, 189, 166]
+
+# The labels for the bar chart
+labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+# Create a XYChart object of size 600 x 360 pixels
+c = XYChart(600, 360)
+
+# Set the plotarea at (70, 20) and of size 500 x 300 pixels, with transparent background and border
+# and light grey (0xcccccc) horizontal grid lines
+c.setPlotArea(70, 20, 500, 300, Transparent, -1, Transparent, 0xcccccc)
+
+# Set the x and y axis stems to transparent and the label font to 12pt Arial
+c.xAxis().setColors(Transparent)
+c.yAxis().setColors(Transparent)
+c.xAxis().setLabelStyle("arial.ttf", 12)
+c.yAxis().setLabelStyle("arial.ttf", 12)
+
+# Add a blue (0x6699bb) bar chart layer using the given data
+layer = c.addBarLayer(data, 0x6699bb)
+
+# Use bar gradient lighting with the light intensity from 0.8 to 1.3
+layer.setBorderColor(Transparent, barLighting(0.8, 1.3))
+
+# Set rounded corners for bars
+layer.setRoundedCorners()
+
+# Display labela on top of bars using 12pt Arial font
+layer.setAggregateLabelStyle("Arial", 12)
+
+# Set the labels on the x axis.
+c.xAxis().setLabels(labels)
+
+# For the automatic y-axis labels, set the minimum spacing to 40 pixels.
+c.yAxis().setTickDensity(40)
+
+# Add a title to the y axis using dark grey (0x555555) 14pt Arial Bold font
+c.yAxis().setTitle("Y-Axis Title Placeholder", "arialbd.ttf", 14, 0x555555)
+
+# Output the chart
+print("Content-type: image/png\n")
+binaryPrint(c.makeChart2(PNG))</pre></td></tr></table>
+</div>
+<br><hr class="separator"><div class="copyright">&copy; 2017 Advanced Software Engineering Limited. All rights reserved.</div>
+</body>
+</HTML>

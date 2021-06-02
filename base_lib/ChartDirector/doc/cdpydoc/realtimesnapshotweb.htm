@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD><meta name="viewport" content="width=device-width, initial-scale=1">
+<Title>Realtime Chart with Snapshot</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+<p class="heading0">ChartDirector 6.0 (Python Edition)</p>
+<p class="heading1">Realtime Chart with Snapshot</p>
+<hr class="separator">
+<div class="content"><img src="images/realtimesnapshot_web.png"><br><br>
+The example extends the <a href="realtimedemoweb.htm">Simple Realtime Chart</a> example by adding buttons to download the chart in PNG and PDF formats.<br><br>
+When the button is pressed, the URL of the web page will be modified by appending an extra query parameter specifying the download format. On the server side, the charting code will check for this parameter. If the parameter exists, it will send the chart as an attachment. When the browser receives the attachment, instead of displaying it, it should save it as a  file. The exact behaviour depends on the browser. Some browsers may immediately save the  attachment as a file in a download directory; some browsers may prompt the user for the  filename and directory; some browsers that do not support downloading files may ignore the  content.<br><br>
+<div style="background-color:#cccccc;width:99%;padding:10px;box-sizing:border-box;">
+<b><font color="#FF0000">NOTE:</font></b> This sample script uses "cdjcv.js". When developing your own script using this sample script as a template, please ensure you copy "cdjcv.js" to the proper directory and reference it using the proper path.
+</div></div><p class="heading1a">Source Code Listing</p><div class="content">
+<b>[CGI Version]</b> pythondemo_cgi\realtimesnapshot.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+
+#
+# In this demo, the generated web page needs to load the "cdjcv.js" Javascript file. For ease of
+# installation, we put "cdjcv.js" in the same directory as this script. However, if this script is
+# installed in a CGI only directory (such as cgi-bin), the web server would not allow the browser to
+# access this non-CGI file.
+#
+# To get around this potential issue, a special load resource script is used to load these files.
+# Instead of using:
+#
+#    &lt;SCRIPT SRC="cdjcv.js"&gt;
+#
+# we now use:
+#
+#    &lt;SCRIPT SRC="loadresource.py?file=cdjcv.js"&gt;
+#
+# If this script is not in a CGI only directory, you may replace the following loadResource string
+# with an empty string "" to improve performance.
+#
+loadResource = "loadresource.py?file="
+
+print("Content-type: text/html\n")
+print("""
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Realtime Chart with Snapshot&lt;/title&gt;
+    &lt;script type="text/javascript" src="%(loadResource)scdjcv.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style="margin:0px"&gt;
+&lt;table cellspacing="0" cellpadding="0" style="border:black 1px solid;"&gt;
+    &lt;tr&gt;
+        &lt;td align="right" colspan="2" style="background:#000088; color:#ffff00; padding:0px 4px 2px 0px;"&gt;
+            &lt;a style="color:#FFFF00; font:italic bold 10pt Arial; text-decoration:none" href="http://www.advsofteng.com/"&gt;
+                Advanced Software Engineering
+            &lt;/a&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr valign="top"&gt;
+        &lt;td style="width:130px; background:#c0c0ff; border-right:black 1px solid; border-bottom:black 1px solid;"&gt;
+            &lt;br /&gt;
+            &lt;br /&gt;
+            &lt;div style="font:12px Verdana; padding:10px;"&gt;
+                &lt;b&gt;Update Period&lt;/b&gt;&lt;br /&gt;
+                &lt;select id="UpdatePeriod" style="width:110px"&gt;
+                    &lt;option value="5"&gt;5&lt;/option&gt;
+                    &lt;option value="10" selected="selected"&gt;10&lt;/option&gt;
+                    &lt;option value="20"&gt;20&lt;/option&gt;
+                    &lt;option value="30"&gt;30&lt;/option&gt;
+                    &lt;option value="60"&gt;60&lt;/option&gt;
+                &lt;/select&gt;
+                &lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+                &lt;b&gt;Time Remaining&lt;/b&gt;&lt;br /&gt;
+                &lt;div style="width:108px; border:#888888 1px inset;"&gt;
+                    &lt;div style="margin:3px" id="TimeRemaining"&gt;0&lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;br /&gt;
+            &lt;br /&gt;
+            &lt;br /&gt;
+            &lt;br /&gt;
+            &lt;div style="text-align:center"&gt;
+                &lt;input type="button" value="Download PDF" onclick="download('pdf')" style="width:112px; font:10pt Arial" /&gt;&lt;br /&gt;
+                &lt;input type="button" value="Download PNG" onclick="download('png')" style="width:112px; font:10pt Arial" /&gt;
+            &lt;/div&gt;
+        &lt;/td&gt;
+        &lt;td style="border-left:black 1px solid; padding:5px 0px 0px 5px;" &gt;
+            &lt;!-- ****** Here is the image tag for the chart image ****** --&gt;
+            &lt;img id="ChartImage1" src="realtimesnapshotchart.py?chartId=demoChart1"&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;script type="text/javascript"&gt;
+
+//
+// Executes once every second to update the countdown display. Updates the chart when the countdown reaches 0.
+//
+function timerTick()
+{
+    // Get the update period and the time left
+    var updatePeriod = parseInt(document.getElementById("UpdatePeriod").value);
+    var timeLeft = Math.min(parseInt(document.getElementById("TimeRemaining").innerHTML), updatePeriod) - 1;
+
+    if (timeLeft == 0)
+        // Can update the chart now
+        JsChartViewer.get('ChartImage1').streamUpdate();
+    else if (timeLeft &lt; 0)
+        // Reset the update period
+        timeLeft += updatePeriod;
+
+    // Update the countdown display
+    document.getElementById("TimeRemaining").innerHTML = timeLeft;
+}
+window.setInterval("timerTick()", 1000);
+
+//
+// Send a request to the server with the query parameter "download=xxx". The server should handle this
+// as a download request.
+//
+function download(format)
+{
+    var imageURL = document.getElementById("ChartImage1").src;
+    imageURL += ((imageURL.indexOf('?') == -1) ? '?' : '&amp;') + "download=" + format;
+
+    // Download as an attachment to the current window
+    location.href = imageURL;
+}
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+""" % {
+    "loadResource" : loadResource
+    })</pre></td></tr></table><br>
+<b>[CGI Version]</b> pythondemo_cgi\realtimesnapshotchart.py
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/python
+from pychartdir import *
+import cgi, sys, math
+
+# Get HTTP query parameters
+query = cgi.FieldStorage()
+
+#
+# Data to draw the chart. In this demo, the data buffer will be filled by a random data generator.
+# In real life, the data is probably stored in a buffer (eg. a database table, a text file, or some
+# global memory) and updated by other means.
+#
+
+# We use a data buffer to emulate the last 240 samples.
+sampleSize = 240
+dataSeries1 = [0] * sampleSize
+dataSeries2 = [0] * sampleSize
+dataSeries3 = [0] * sampleSize
+timeStamps = [0] * sampleSize
+
+# Our pseudo random number generator
+firstDate = chartTime2(time.time()) - len(timeStamps)
+for i in range(0, len(timeStamps)) :
+    p = firstDate + i
+    timeStamps[i] = p
+    dataSeries1[i] = math.cos(p * 2.1) * 10 + 1 / (math.cos(p) * math.cos(p) + 0.01) + 20
+    dataSeries2[i] = 100 * math.sin(p / 27.7) * math.sin(p / 10.1) + 150
+    dataSeries3[i] = 100 * math.cos(p / 6.7) * math.cos(p / 11.9) + 150
+
+# Create an XYChart object 600 x 320 pixels in size
+c = XYChart(600, 320)
+
+# Set the plotarea at (55, 60) and of size 520 x 235 pixels with transparent background and border.
+# Enable both horizontal and vertical grids by setting their colors to grey (cccccc). Set clipping
+# mode to clip the data lines to the plot area.
+c.setPlotArea(55, 60, 520, 235, -1, -1, Transparent, 0xcccccc, 0xcccccc)
+c.setClipping()
+
+# Add a title to the chart using dark grey (0x333333) 20pt Arial Bold font
+c.addTitle("Realtime Chart with Snapshot", "arialbd.ttf", 20, 0x333333)
+
+# Add a legend box at the top of the plot area using horizontal layout. Use 10pt Arial Bold font,
+# transparent background and border, and line style legend icon.
+b = c.addLegend(55, 30, 0, "arialbd.ttf", 10)
+b.setBackground(Transparent, Transparent)
+b.setLineStyleKey()
+
+# Set the x and y axis stems to transparent and the label font to 10pt Arial
+c.xAxis().setColors(Transparent)
+c.yAxis().setColors(Transparent)
+c.xAxis().setLabelStyle("arial.ttf", 10)
+c.yAxis().setLabelStyle("arial.ttf", 10)
+
+# Add y-axis title using 12pt Arial font
+c.yAxis().setTitle("Y-Axis Title Placeholder", "arial.ttf", 12)
+
+# For the automatic x and y axis labels, set the minimum spacing to 75 and 30 pixels.
+c.xAxis().setTickDensity(75)
+c.yAxis().setTickDensity(30)
+
+# Set the x-axis label format
+c.xAxis().setLabelFormat("{value|hh:nn:ss}")
+
+# Create a line layer to plot the lines
+layer = c.addLineLayer2()
+
+# The x-coordinates are the timeStamps.
+layer.setXData(timeStamps)
+
+# The 3 data series are used to draw 3 lines. Here we put the latest data values as part of the data
+# set name, so you can see them updated in the legend box.
+layer.addDataSet(dataSeries1, 0xff0000, c.formatValue(dataSeries1[len(dataSeries1) - 1],
+    "Alpha: {value|2}"))
+layer.addDataSet(dataSeries2, 0x00cc00, c.formatValue(dataSeries2[len(dataSeries2) - 1],
+    "Beta: {value|2}"))
+layer.addDataSet(dataSeries3, 0x0000ff, c.formatValue(dataSeries3[len(dataSeries3) - 1],
+    "Gamma: {value|2}"))
+
+# Check if is download request
+downloadFormat = query.has_key("download") and query["download"].value or None
+if not ((downloadFormat == None) or (downloadFormat == "")) :
+    fname = "demo_%s" % (c.formatValue(timeStamps[len(timeStamps) - 1], "yyyymmddhhnnss"))
+    if downloadFormat == "pdf" :
+        # Output in PDF and stream as attachment
+        print("Content-Disposition: attachment; filename=\"" + fname + ".pdf\"")
+        print("Content-type: application/pdf\n")
+        binaryPrint(c.makeChart2(PDF))
+        sys.exit()
+    else :
+        # Output in PNG and stream as attachment
+        print("Content-Disposition: attachment; filename=\"" + fname + ".png\"")
+        print("Content-type: image/png\n")
+        binaryPrint(c.makeChart2(PNG))
+        sys.exit()
+
+# Output the chart
+print("Content-type: image/png\n")
+binaryPrint(c.makeChart2(PNG))</pre></td></tr></table></div><br>
+<hr class="separator"><div class="copyright">&copy; 2017 Advanced Software Engineering Limited. All rights reserved.</div></body>
+</HTML>
